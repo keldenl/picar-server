@@ -1,6 +1,7 @@
 import express from 'express';
 import session from 'express-session';
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import passport from "passport";
 import dotenv from 'dotenv';
 
@@ -13,8 +14,22 @@ if (process.env.NODE_ENV !== 'production') {
 const PORT = process.env.PORT || 9000;
 const app = express();
 
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// allow cross origin cookies
+app.use(function (req, res, next) {
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+    if ('OPTIONS' == req.method) {
+        res.send(200);
+    } else {
+        next();
+    }
+});
 
 app.use(session({
     name: 'picar-auth-session',
@@ -39,6 +54,10 @@ app.get("/", (req, res) => {
     res.json({ message: "You are not logged in" })
 })
 
+app.get("/profile", isLoggedIn, (req, res) => {
+    res.json({ message: "You are  logged in", ...req.user })
+})
+
 app.get("/failed", (req, res) => {
     res.send("Failed")
 })
@@ -57,7 +76,8 @@ app.get('/google',
 app.get('/google/callback',
     passport.authenticate('google', {
         failureRedirect: '/failed',
-        successRedirect: '/success'
+        successRedirect: '/success',
+        session: true
     }),
     function (req, res) {
         user = req.user;
@@ -65,10 +85,12 @@ app.get('/google/callback',
     }
 );
 
-app.get("/logout", (req, res) => {
-    req.session = null;
-    req.logout();
-    res.redirect('/');
+app.get("/logout", (req, res, next) => {
+    // req.session = null;
+    req.logout(function (err) {
+        if (err) { return next(err); }
+        res.redirect('/');
+    });
 })
 
 app.listen(PORT, () => {

@@ -27,9 +27,3 @@ passport.use(new GoogleStrategy({
         return done(null, profile);
     }
 ));
-
-
-// client id: 
-// 585814122874-0r98jj6bhtgdiasvljepern1p41j5ntl.apps.googleusercontent.com
-// secret: 
-// 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
