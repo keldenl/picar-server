@@ -55,15 +55,14 @@ app.get("/", (req, res) => {
 })
 
 app.get("/profile", isLoggedIn, (req, res) => {
-    res.json({ message: "You are  logged in", ...req.user })
+    res.json({ message: "You are  logged in", user: req.user })
 })
 
 app.get("/failed", (req, res) => {
     res.send("Failed")
 })
 app.get("/success", isLoggedIn, (req, res) => {
-    console.log(req.user);
-    res.send(`Welcome ${req.user.email}`)
+    res.redirect('http://localhost:3000/picar/profile')
 })
 
 app.get('/google',
@@ -89,7 +88,8 @@ app.get("/logout", (req, res, next) => {
     // req.session = null;
     req.logout(function (err) {
         if (err) { return next(err); }
-        res.redirect('/');
+        // res.json({ message: 'Logged out' })
+        res.redirect('http://localhost:3000/picar')
     });
 })
 
