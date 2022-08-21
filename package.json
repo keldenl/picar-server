@@ -1,6 +1,7 @@
 {
     "name": "picar-server",
     "version": "1.0.0",
+    "type": "module",
     "main": "index.js",
     "repository": "git@github.com:keldenl/picar-server.git",
     "author": "keldenl <keldenlin@gmail.com>",
