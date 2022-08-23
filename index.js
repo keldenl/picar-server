@@ -8,9 +8,9 @@ import { Client, Entity, Schema, Repository } from 'redis-om';
 
 
 import "./passport.js"
+import { clientConnect } from './redisUtil.js';
+import { userSchema } from './schema/user.js';
 import { createIndex } from './createIndex.js';
-import { clientConnect } from './passport.js'
-import { userSchema } from './schemas/user.js';
 
 if (process.env.NODE_ENV !== 'production') {
     dotenv.config();

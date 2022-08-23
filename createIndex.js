@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { Client, Entity, Schema, Repository } from 'redis-om';
-import { userSchema } from './schemas/User.js';
-import { clientConnect } from './passport.js';
+import { userSchema } from './schema/User.js';
+import { clientConnect } from './redisUtil.js';
 
 
 if (process.env.NODE_ENV !== 'production') {
