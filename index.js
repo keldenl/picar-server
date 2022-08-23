@@ -8,8 +8,7 @@ import { Client, Entity, Schema, Repository } from 'redis-om';
 
 
 import "./passport.js"
-import { clientConnect } from './redisUtil.js';
-import { userSchema } from './schema/user.js';
+import { getUserRepo } from './schema/user.js';
 import { createIndex } from './createIndex.js';
 
 if (process.env.NODE_ENV !== 'production') {
@@ -108,10 +107,8 @@ app.get("/createIndex", (req, res) => {
 })
 
 app.get("/users", async (req, res) => {
-    const client = await clientConnect();
-
-    const repository = new Repository(userSchema, client);
-    const users = await repository.search()
+    const userRepo = await getUserRepo();
+    const users = await userRepo.search()
         .return.all();
     return res.status(202).json({ users });
 })
