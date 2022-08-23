@@ -5,7 +5,7 @@ class User extends Entity { }
 export let userSchema = new Schema(
     User,
     {
-        sub: { type: 'string' },
+        sub: { type: 'string', textSearch: true },
         email: { type: 'string', textSearch: true },
         username: { type: 'string', textSearch: true },
     },
