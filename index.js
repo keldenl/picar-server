@@ -8,7 +8,7 @@ import { Client, Entity, Schema, Repository } from 'redis-om';
 
 
 import "./passport.js"
-import { getUserRepo } from './schema/user.js';
+import { getUserRepo, fetchUserById } from './schema/user.js';
 import { createIndex } from './createIndex.js';
 
 if (process.env.NODE_ENV !== 'production') {
@@ -111,6 +111,15 @@ app.get("/users", async (req, res) => {
     const users = await userRepo.search()
         .return.all();
     return res.status(202).json({ users });
+})
+
+app.get("/updateUser", isLoggedIn, async (req, res) => {
+    const { entityId: userId } = req.user
+    const { repo, user } = await fetchUserById(userId);
+    user.username = 'swaglord'
+    console.log(user);
+    await repo.save(user);
+    return res.status(202).json({ user });
 })
 
 app.listen(PORT, () => {

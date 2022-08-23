@@ -29,3 +29,11 @@ export async function getUserRepo() {
     const repository = new Repository(userSchema, client);
     return repository;
 }
+
+export async function fetchUserById(userId) {
+    const client = await clientConnect();
+    const repo = client.fetchRepository(userSchema);
+    const user = await repo.fetch(userId);
+    return { repo, user };
+}
+
