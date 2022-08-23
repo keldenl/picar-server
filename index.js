@@ -4,8 +4,13 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import passport from "passport";
 import dotenv from 'dotenv';
+import { Client, Entity, Schema, Repository } from 'redis-om';
+
 
 import "./passport.js"
+import { createIndex } from './createIndex.js';
+import { clientConnect } from './passport.js'
+import { userSchema } from './schemas/user.js';
 
 if (process.env.NODE_ENV !== 'production') {
     dotenv.config();
@@ -54,6 +59,7 @@ app.get("/", (req, res) => {
     res.json({ message: "You are not logged in" })
 })
 
+
 app.get("/profile", isLoggedIn, (req, res) => {
     res.json({ message: "You are  logged in", user: req.user })
 })
@@ -91,6 +97,23 @@ app.get("/logout", (req, res, next) => {
         // res.json({ message: 'Logged out' })
         res.redirect('http://localhost:3000/picar')
     });
+})
+
+
+// admin only
+app.get("/createIndex", (req, res) => {
+    createIndex().then(() => {
+        res.send('Indexes created');
+    })
+})
+
+app.get("/users", async (req, res) => {
+    const client = await clientConnect();
+
+    const repository = new Repository(userSchema, client);
+    const users = await repository.search()
+        .return.all();
+    return res.status(202).json({ users });
 })
 
 app.listen(PORT, () => {
