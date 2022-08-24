@@ -19,17 +19,17 @@ const PORT = process.env.PORT || 9000;
 const app = express();
 
 app.use(cookieParser());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
 
 // allow cross origin cookies
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Credentials', true);
-    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
     if ('OPTIONS' == req.method) {
-        res.send(200);
+        res.sendStatus(200);
     } else {
         next();
     }
@@ -59,7 +59,7 @@ app.get("/", (req, res) => {
 })
 
 
-app.get("/profile", isLoggedIn, (req, res) => {
+app.get("/profile", isLoggedIn, async (req, res) => {
     res.json({ message: "You are  logged in", user: req.user })
 })
 
@@ -113,13 +113,28 @@ app.get("/users", async (req, res) => {
     return res.status(202).json({ users });
 })
 
-app.get("/updateUser", isLoggedIn, async (req, res) => {
+app.post("/updateUsername", isLoggedIn, async (req, res) => {
+    const { username: newUsername } = req.body
     const { entityId: userId } = req.user
+
     const { repo, user } = await fetchUserById(userId);
-    user.username = 'swaglord'
-    console.log(user);
+    user.username = newUsername;
     await repo.save(user);
-    return res.status(202).json({ user });
+
+    req.session.passport.user.username = newUsername
+    return res.status(202).json(user);
+})
+
+app.post("/upload", isLoggedIn, async (req, res) => {
+    const { uploadImg: img } = req.body
+    const { entityId: userId } = req.user
+    console.log(img)
+    // const { repo, user } = await fetchUserById(userId);
+    // user.username = newUsername;
+    // await repo.save(user);
+
+    // req.session.passport.user.username = newUsername
+    return res.status(202).json({ img });
 })
 
 app.listen(PORT, () => {
