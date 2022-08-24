@@ -8,8 +8,9 @@ import { Client, Entity, Schema, Repository } from 'redis-om';
 
 
 import "./passport.js"
-import { getUserRepo, fetchUserById } from './schema/user.js';
+import { getUserRepo, fetchUserById, fetchUserIdByUsername } from './schema/user.js';
 import { createIndex } from './createIndex.js';
+import { createPost, fetchPostByUserId } from './schema/Post.js';
 
 if (process.env.NODE_ENV !== 'production') {
     dotenv.config();
@@ -67,7 +68,7 @@ app.get("/failed", (req, res) => {
     res.send("Failed")
 })
 app.get("/success", isLoggedIn, (req, res) => {
-    res.redirect('http://localhost:3000/picar/profile')
+    res.redirect(`http://localhost:3000/picar/profile/${req.user.username}`)
 })
 
 app.get('/google',
@@ -117,7 +118,7 @@ app.post("/updateUsername", isLoggedIn, async (req, res) => {
     const { username: newUsername } = req.body
     const { entityId: userId } = req.user
 
-    const { repo, user } = await fetchUserById(userId);
+    const { repo, entity: user } = await fetchUserById(userId);
     user.username = newUsername;
     await repo.save(user);
 
@@ -126,15 +127,35 @@ app.post("/updateUsername", isLoggedIn, async (req, res) => {
 })
 
 app.post("/upload", isLoggedIn, async (req, res) => {
-    const { uploadImg: img } = req.body
+    const { uploadImg: data, description } = req.body
     const { entityId: userId } = req.user
-    console.log(img)
-    // const { repo, user } = await fetchUserById(userId);
-    // user.username = newUsername;
-    // await repo.save(user);
+    try {
+        const entityId = await createPost({ data, userId, ...(description ? description : {}) });
+        return res.status(201).json({ entityId, description })
+    } catch (error) {
+        return res.status(500).json({ error })
+    }
+})
 
-    // req.session.passport.user.username = newUsername
-    return res.status(202).json({ img });
+app.get('/users/:username', async (req, res) => {
+    const { username } = req.params
+    try {
+        const userId = await fetchUserIdByUsername(username);
+        return res.status(200).json({ userId });
+    } catch (error) {
+        return res.status(500).json({ error })
+    }
+})
+app.get('/posts/:username', async (req, res) => {
+    const { username } = req.params
+    try {
+        const userId = await fetchUserIdByUsername(username);
+        const posts = await fetchPostByUserId(userId);
+        console.log(posts);
+        return res.status(200).json(posts);
+    } catch (error) {
+        return res.status(500).json({ error })
+    }
 })
 
 app.listen(PORT, () => {

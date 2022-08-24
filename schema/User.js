@@ -1,5 +1,7 @@
 import { Client, Entity, Schema, Repository } from 'redis-om';
 import { clientConnect } from '../redisUtil.js';
+import { createEntity, fetchEntityById, getEntityRepo } from './schemaUtils.js';
+
 
 class User extends Entity { }
 export let userSchema = new Schema(
@@ -14,26 +16,27 @@ export let userSchema = new Schema(
     }
 );
 
+
 export async function createUser(data) {
-    const client = await clientConnect();
-
-    const repository = client.fetchRepository(userSchema)
-    const user = repository.createEntity(data);
-
-    const id = await repository.save(user);
-    return id;
+    return await createEntity(userSchema, data);
 }
 
 export async function getUserRepo() {
-    const client = await clientConnect();
-    const repository = new Repository(userSchema, client);
-    return repository;
+    return await getEntityRepo(userSchema);
 }
 
 export async function fetchUserById(userId) {
-    const client = await clientConnect();
-    const repo = client.fetchRepository(userSchema);
-    const user = await repo.fetch(userId);
-    return { repo, user };
+    return await fetchEntityById(userSchema, userId);
 }
 
+export async function fetchUserIdByUsername(username) {
+    try {
+        const userRepo = await getUserRepo();
+        const users = await userRepo.search()
+            .where('username').eq(username)
+            .return.all();
+        return users[0].entityId;
+    } catch (error) {
+        throw error;
+    }
+}
