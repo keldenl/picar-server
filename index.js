@@ -11,7 +11,7 @@ import "./passport.js"
 import { getUserRepo, fetchUserById, fetchUserIdByUsername } from './schema/user.js';
 import { createIndex } from './createIndex.js';
 import { createPost, fetchPostByUserId } from './schema/Post.js';
-import { createRequest } from './schema/Request.js';
+import { createRequest, fetchRequestsByUserFromId } from './schema/Request.js';
 
 if (process.env.NODE_ENV !== 'production') {
     dotenv.config();
@@ -163,6 +163,16 @@ app.get('/posts/:username', async (req, res) => {
 })
 
 // friend requests routes
+app.get('/requests/sent', isLoggedIn, async (req, res) => {
+    const { entityId: userFromId } = req.user
+    try {
+        const requests = await fetchRequestsByUserFromId(userFromId);
+        return res.status(200).json(requests);
+    } catch (error) {
+        return res.status(500).json({ error })
+    }
+})
+
 app.post("/sendRequest", isLoggedIn, async (req, res) => {
     const { reqUserId, reqUsername } = req.body
     const { entityId: userFromId } = req.user

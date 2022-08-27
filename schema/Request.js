@@ -27,10 +27,10 @@ export async function getRequestRepo() {
 }
 
 export async function fetchRequestById(requestId) {
-    return await fetchEntityById(requestSchema, postId);
+    return await fetchEntityById(requestSchema, requestId);
 }
 
-export async function fetchRequestByUserFromId(userFromId) {
+export async function fetchRequestsByUserFromId(userFromId) {
     try {
         const requestRepo = await getRequestRepo();
         const requests = await requestRepo.search()
@@ -42,7 +42,7 @@ export async function fetchRequestByUserFromId(userFromId) {
     }
 }
 
-export async function fetchRequestByUserToId(userToId) {
+export async function fetchRequestsByUserToId(userToId) {
     try {
         const requestRepo = await getRequestRepo();
         const requests = await requestRepo.search()
