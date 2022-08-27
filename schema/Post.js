@@ -6,10 +6,10 @@ class Post extends Entity { }
 export let postSchema = new Schema(
     Post,
     {
-        userId: { type: 'string', textSearch: true },
+        userId: { type: 'string' },
         data: { type: 'string' },
         datePosted: { type: 'date' },
-        description: { type: 'string' },
+        description: { type: 'string', textSearch: true },
         likers: { type: 'string[]' }
     },
     {

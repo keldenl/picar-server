@@ -107,11 +107,22 @@ app.get("/createIndex", (req, res) => {
     })
 })
 
+// user routes
 app.get("/users", async (req, res) => {
     const userRepo = await getUserRepo();
     const users = await userRepo.search()
         .return.all();
     return res.status(202).json({ users });
+})
+
+app.get('/users/:username', async (req, res) => {
+    const { username } = req.params
+    try {
+        const userId = await fetchUserIdByUsername(username);
+        return res.status(200).json({ userId });
+    } catch (error) {
+        return res.status(500).json({ error })
+    }
 })
 
 app.post("/updateUsername", isLoggedIn, async (req, res) => {
@@ -126,6 +137,7 @@ app.post("/updateUsername", isLoggedIn, async (req, res) => {
     return res.status(202).json(user);
 })
 
+// posts routes
 app.post("/upload", isLoggedIn, async (req, res) => {
     const { uploadImg: data, description } = req.body
     const { entityId: userId } = req.user
@@ -137,15 +149,6 @@ app.post("/upload", isLoggedIn, async (req, res) => {
     }
 })
 
-app.get('/users/:username', async (req, res) => {
-    const { username } = req.params
-    try {
-        const userId = await fetchUserIdByUsername(username);
-        return res.status(200).json({ userId });
-    } catch (error) {
-        return res.status(500).json({ error })
-    }
-})
 app.get('/posts/:username', async (req, res) => {
     const { username } = req.params
     try {
