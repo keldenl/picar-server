@@ -8,7 +8,7 @@ export async function createEntity(schema, data) {
     const post = repository.createEntity(data);
 
     const id = await repository.save(post);
-    return id;
+    return { id, ...data };
 }
 
 export async function getEntityRepo(schema) {
