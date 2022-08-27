@@ -11,6 +11,7 @@ import "./passport.js"
 import { getUserRepo, fetchUserById, fetchUserIdByUsername } from './schema/user.js';
 import { createIndex } from './createIndex.js';
 import { createPost, fetchPostByUserId } from './schema/Post.js';
+import { createRequest } from './schema/Request.js';
 
 if (process.env.NODE_ENV !== 'production') {
     dotenv.config();
@@ -142,8 +143,8 @@ app.post("/upload", isLoggedIn, async (req, res) => {
     const { uploadImg: data, description } = req.body
     const { entityId: userId } = req.user
     try {
-        const entityId = await createPost({ data, userId, ...(description ? description : {}) });
-        return res.status(201).json({ entityId, description })
+        const newPost = await createPost({ data, userId, ...(description ? description : {}) });
+        return res.status(201).json(newPost)
     } catch (error) {
         return res.status(500).json({ error })
     }
@@ -156,6 +157,21 @@ app.get('/posts/:username', async (req, res) => {
         const posts = await fetchPostByUserId(userId);
         console.log(posts);
         return res.status(200).json(posts);
+    } catch (error) {
+        return res.status(500).json({ error })
+    }
+})
+
+// friend requests routes
+app.post("/sendRequest", isLoggedIn, async (req, res) => {
+    const { reqUserId, reqUsername } = req.body
+    const { entityId: userFromId } = req.user
+    try {
+        // if we only passed the username, get the user id first
+        const userToId = reqUserId != null ? reqUserId : await fetchUserIdByUsername(reqUsername);
+
+        const newRequest = await createRequest({ userFromId, userToId });
+        return res.status(201).json(newRequest)
     } catch (error) {
         return res.status(500).json({ error })
     }
