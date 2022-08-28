@@ -1,5 +1,6 @@
 import { Entity, Schema } from 'redis-om';
 import { createEntity, fetchEntityById, getEntityRepo } from './schemaUtils.js';
+import { fetchUserById } from './User.js';
 
 class Request extends Entity { }
 export let requestSchema = new Schema(
@@ -52,4 +53,52 @@ export async function fetchRequestsByUserToId(userToId) {
     } catch (error) {
         throw error;
     }
+}
+
+export async function removeRequestById(requestId, userId) {
+    const { repo: requestRepo, entity: requestEntity } = await fetchRequestById(requestId);
+    const { userFromId, userToId } = requestEntity;
+
+    // TODO: Make separate routes from "reject" and "cancel" and do better validation on the user to/from
+    if (userFromId !== userId && userToId !== userId) {
+        throw new Error("User is not authorized to remove this request")
+    }
+
+    return await requestRepo.remove(requestId);
+}
+
+export async function acceptRequest(requestId, userId) {
+    const { repo: requestRepo, entity: requestEntity } = await fetchRequestById(requestId);
+    const { userFromId, userToId } = requestEntity;
+
+    if (userFromId == null || userToId == null) {
+        console.log('one of them is null')
+        throw new Error("The friend request you're trying to accept doesn't exist or is corrupted")
+    }
+
+
+    // only the user who received the requeset can accept the friend request
+    if (userToId !== userId) {
+        console.log('mismatch user')
+        console.log(requestId)
+        console.log({ userFromId, userToId })
+        console.log(userId)
+        throw new Error("User is not authorized to accept this request");
+    }
+
+    // Add to each other's friend list
+    const { repo, entity: user } = await fetchUserById(userFromId);
+    user.friendIds.push(userToId);
+    repo.save(user).then(() => {
+
+    });
+
+    const { entity: friend } = await fetchUserById(userToId);
+    friend.friendIds.push(userFromId);
+    await repo.save(friend);
+
+    // Remove the request from pending
+    await requestRepo.remove(requestId);
+
+    return { userFromId, userToId, requestId }
 }

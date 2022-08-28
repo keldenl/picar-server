@@ -1,5 +1,4 @@
-import { Client, Entity, Schema, Repository } from 'redis-om';
-import { clientConnect } from '../redisUtil.js';
+import { Entity, Schema } from 'redis-om';
 import { createEntity, fetchEntityById, getEntityRepo } from './schemaUtils.js';
 
 
@@ -7,9 +6,10 @@ class User extends Entity { }
 export let userSchema = new Schema(
     User,
     {
-        sub: { type: 'string', textSearch: true },
+        sub: { type: 'string' },
         email: { type: 'string', textSearch: true },
         username: { type: 'string', textSearch: true },
+        friendIds: { type: 'string[]' }
     },
     {
         dataStructure: 'JSON',
@@ -18,7 +18,10 @@ export let userSchema = new Schema(
 
 
 export async function createUser(data) {
-    return await createEntity(userSchema, data);
+    const defaultValues = {
+        friendIds: []
+    }
+    return await createEntity(userSchema, { ...defaultValues, ...data });
 }
 
 export async function getUserRepo() {

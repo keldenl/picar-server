@@ -4,14 +4,12 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import passport from "passport";
 import dotenv from 'dotenv';
-import { Client, Entity, Schema, Repository } from 'redis-om';
-
-
 import "./passport.js"
+
 import { getUserRepo, fetchUserById, fetchUserIdByUsername } from './schema/user.js';
 import { createIndex } from './createIndex.js';
 import { createPost, fetchPostByUserId } from './schema/Post.js';
-import { createRequest, fetchRequestsByUserFromId, fetchRequestsByUserToId } from './schema/Request.js';
+import { acceptRequest, createRequest, fetchRequestsByUserFromId, fetchRequestsByUserToId, removeRequestById } from './schema/Request.js';
 
 if (process.env.NODE_ENV !== 'production') {
     dotenv.config();
@@ -113,7 +111,7 @@ app.get("/users", async (req, res) => {
     const userRepo = await getUserRepo();
     const users = await userRepo.search()
         .return.all();
-    return res.status(202).json({ users });
+    return res.status(202).json({ message: error.message });
 })
 
 app.get('/users/:username', async (req, res) => {
@@ -122,7 +120,7 @@ app.get('/users/:username', async (req, res) => {
         const userId = await fetchUserIdByUsername(username);
         return res.status(200).json({ userId });
     } catch (error) {
-        return res.status(500).json({ error })
+        return res.status(500).json({ message: error.message })
     }
 })
 
@@ -146,7 +144,7 @@ app.post("/upload", isLoggedIn, async (req, res) => {
         const newPost = await createPost({ data, userId, ...(description ? { description } : {}) });
         return res.status(201).json(newPost)
     } catch (error) {
-        return res.status(500).json({ error })
+        return res.status(500).json({ message: error.message })
     }
 })
 
@@ -157,7 +155,7 @@ app.get('/posts/:username', async (req, res) => {
         const posts = await fetchPostByUserId(userId);
         return res.status(200).json(posts);
     } catch (error) {
-        return res.status(500).json({ error })
+        return res.status(500).json({ message: error.message })
     }
 })
 
@@ -168,7 +166,7 @@ app.get('/requests/sent', isLoggedIn, async (req, res) => {
         const requests = await fetchRequestsByUserFromId(userFromId);
         return res.status(200).json(requests);
     } catch (error) {
-        return res.status(500).json({ error })
+        return res.status(500).json({ message: error.message })
     }
 })
 
@@ -178,7 +176,7 @@ app.get('/requests/received', isLoggedIn, async (req, res) => {
         const requests = await fetchRequestsByUserToId(userFromId);
         return res.status(200).json(requests);
     } catch (error) {
-        return res.status(500).json({ error })
+        return res.status(500).json({ message: error.message })
     }
 })
 
@@ -186,13 +184,44 @@ app.post("/sendRequest", isLoggedIn, async (req, res) => {
     const { reqUserId, reqUsername } = req.body
     const { entityId: userFromId } = req.user
     try {
+        if (reqUserId == null && reqUsername == null) {
+            throw new Error("There is no user that's being friend requested")
+        }
         // if we only passed the username, get the user id first
         const userToId = reqUserId != null ? reqUserId : await fetchUserIdByUsername(reqUsername);
-
         const newRequest = await createRequest({ userFromId, userToId });
         return res.status(201).json(newRequest)
     } catch (error) {
-        return res.status(500).json({ error })
+        return res.status(500).json({ message: error.message })
+    }
+})
+
+app.post('/requests/accept', isLoggedIn, async (req, res) => {
+    const { entityId: userId } = req.user;
+    const { requestId } = req.body;
+    try {
+        if (requestId == null) {
+            throw new Error("Missing requestId to accept");
+        }
+        const response = await acceptRequest(requestId, userId);
+        return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
+    }
+})
+
+app.post('/requests/delete', isLoggedIn, async (req, res) => {
+    const { entityId: userId } = req.user;
+    const { requestId } = req.body;
+    try {
+        if (requestId == null) {
+            throw new Error("Missing requestId to accept");
+        }
+        // TODO: Make separate routes from "reject" and "cancel" and do better validation on the user to/from
+        const response = await removeRequestById(requestId, userId);
+        return res.status(200).json({ ...response, message: 'Successfully deleted the request' });
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
     }
 })
 

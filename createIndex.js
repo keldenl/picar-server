@@ -12,6 +12,6 @@ if (process.env.NODE_ENV !== 'production') {
 export async function createIndex() {
     const client = await clientConnect();
 
-    const repository = new Repository(requestSchema, client);
+    const repository = new Repository(userSchema, client);
     await repository.createIndex()
 }
