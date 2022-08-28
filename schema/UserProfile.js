@@ -1,5 +1,4 @@
-import { Client, Entity, Schema, Repository } from 'redis-om';
-import { clientConnect } from '../redisUtil.js';
+import { Entity, Schema } from 'redis-om';
 import { createEntity, fetchEntityById, getEntityRepo } from './schemaUtils.js';
 
 class UserProfile extends Entity { }
@@ -37,6 +36,15 @@ export async function fetchUserProfileByUserId(userId) {
     } catch (error) {
         throw error;
     }
+}
+
+export async function addUserProfileData(dataList) {
+    const newDataList = await Promise.all(dataList.map(async (data) => {
+        const userProfile = await fetchUserProfileByUserId(data.userId)
+        return { ...data.toJSON(), userProfile: userProfile.toJSON() }
+    }))
+
+    return newDataList;
 }
 
 export async function updateUserProfileByUserId(userId, data) {

@@ -1,6 +1,7 @@
 import { Client, Entity, Schema, Repository } from 'redis-om';
 import { clientConnect } from '../redisUtil.js';
 import { createEntity, fetchEntityById, getEntityRepo } from './schemaUtils.js';
+import { addUserProfileData } from './UserProfile.js';
 
 class Post extends Entity { }
 export let postSchema = new Schema(
@@ -41,7 +42,8 @@ export async function fetchPostByUserId(userId) {
         const posts = await postRepo.search()
             .where('userId').eq(userId)
             .return.all();
-        return posts;
+        const postsWithProfile = await addUserProfileData(posts)
+        return postsWithProfile;
     } catch (error) {
         throw error;
     }

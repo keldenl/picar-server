@@ -37,19 +37,20 @@ passport.use(new GoogleStrategy({
         // user already exists
         if (user != null) {
             // REMOVE THIS | temp: testing adding userProfile. 
-            console.log('passing this into the update user profile', user.entityId, {
-                userId: user.entityId,
-                username: user.username
-            })
-            await createUserProfile({
-                userId: user.entityId,
-                username: user.username
-            }).then(() => {
-                // there should be only one user
-                const existingUser = user.toJSON();
-                console.log('user exists: ', existingUser)
-                return done(null, existingUser)
-            })
+            // console.log('passing this into the update user profile', user.entityId, {
+            //     userId: user.entityId,
+            //     username: user.username
+            // })
+            // await createUserProfile({
+            //     userId: user.entityId,
+            //     username: user.username
+            // }).then(() => {
+            // there should be only one user
+            const existingUser = user.toJSON();
+            console.log('entity: ', user)
+            console.log('user exists: ', existingUser)
+            return done(null, existingUser)
+            // })
 
         }
         // create a new user in the database
