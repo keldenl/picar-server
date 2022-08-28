@@ -3,6 +3,7 @@ import { Client, Entity, Schema, Repository } from 'redis-om';
 import { userSchema } from './schema/User.js';
 import { clientConnect } from './redisUtil.js';
 import { requestSchema } from './schema/Request.js';
+import { userProfileSchema } from './schema/UserProfile.js';
 
 
 if (process.env.NODE_ENV !== 'production') {
@@ -12,6 +13,6 @@ if (process.env.NODE_ENV !== 'production') {
 export async function createIndex() {
     const client = await clientConnect();
 
-    const repository = new Repository(userSchema, client);
+    const repository = new Repository(userProfileSchema, client);
     await repository.createIndex()
 }

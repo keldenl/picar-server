@@ -1,5 +1,6 @@
 import { Entity, Schema } from 'redis-om';
 import { createEntity, fetchEntityById, getEntityRepo } from './schemaUtils.js';
+import { createUserProfile } from './UserProfile.js';
 
 
 class User extends Entity { }
@@ -21,7 +22,14 @@ export async function createUser(data) {
     const defaultValues = {
         friendIds: []
     }
-    return await createEntity(userSchema, { ...defaultValues, ...data });
+    const newUser = await createEntity(userSchema, { ...defaultValues, ...data });
+    console.log(newUser)
+    createUserProfile({
+        userId: newUser.id,
+        username: newUser.username
+    }).then(() => {
+        return newUser;
+    }).catch((e) => { throw e; })
 }
 
 export async function getUserRepo() {

@@ -4,6 +4,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from 'passport-google-oauth2';
 import { clientConnect } from './redisUtil.js';
 import { createUser, getUserRepo } from './schema/user.js';
+import { createUserProfile, updateUserProfileByUserId } from './schema/UserProfile.js';
 
 if (process.env.NODE_ENV !== 'production') {
     dotenv.config();
@@ -35,10 +36,21 @@ passport.use(new GoogleStrategy({
 
         // user already exists
         if (user != null) {
-            // there should be only one user
-            const existingUser = user.toJSON();
-            console.log('user exists: ', existingUser)
-            return done(null, existingUser)
+            // REMOVE THIS | temp: testing adding userProfile. 
+            console.log('passing this into the update user profile', user.entityId, {
+                userId: user.entityId,
+                username: user.username
+            })
+            await createUserProfile({
+                userId: user.entityId,
+                username: user.username
+            }).then(() => {
+                // there should be only one user
+                const existingUser = user.toJSON();
+                console.log('user exists: ', existingUser)
+                return done(null, existingUser)
+            })
+
         }
         // create a new user in the database
         else {
@@ -49,9 +61,9 @@ passport.use(new GoogleStrategy({
             }
             console.log(newUserData);
             try {
-                const entityId = await createUser(newUserData);
-                console.log('created new user at ' + entityId);
-                return done(null, { entityId, ...newUserData })
+                const newUser = await createUser(newUserData);
+                console.log('created new user: ' + newUser);
+                return done(null, newUser)
             } catch (e) {
                 return done(e, ...newUserData);
             }
