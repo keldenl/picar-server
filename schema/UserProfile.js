@@ -38,23 +38,25 @@ export async function fetchUserProfileByUserId(userId) {
     }
 }
 
-export async function addUserProfileData(dataList) {
+export async function addUserProfileData(dataList, userId, idField = 'userId') {
     const newDataList = await Promise.all(dataList.map(async (data) => {
-        const userProfile = await fetchUserProfileByUserId(data.userId)
-        return { ...data.toJSON(), userProfile: userProfile.toJSON() }
+        const dataObj = data.toJSON();
+        const userProfile = await fetchUserProfileByUserId(userId != null ? userId : dataObj[idField])
+        return { ...dataObj, userProfile: userProfile.toJSON() }
     }))
 
     return newDataList;
 }
 
-export async function updateUserProfileByUserId(userId, data) {
-    const { repo, entity: userProfile } = await fetchUserProfileByUserId(userId);
-    const newUserProfile = { ...userProfile, ...data };
-    userProfile = newUserProfile;
-    await repo.save(userProfile).then(() => {
-        return userProfile
-    }).catch((e) => {
+export async function updateUserProfileDisplayPicture(userId, displayPicture) {
+    const repo = await getUserProfileRepo();
+    const userProfile = await fetchUserProfileByUserId(userId);
+    userProfile.displayPicture = displayPicture;
+    try {
+        await repo.save(userProfile);
+        return userProfile;
+    } catch (e) {
+        console.log(e)
         throw e;
-    })
+    }
 }
-

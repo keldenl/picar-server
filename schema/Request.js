@@ -1,6 +1,7 @@
 import { Entity, Schema } from 'redis-om';
 import { createEntity, fetchEntityById, getEntityRepo } from './schemaUtils.js';
 import { fetchUserById } from './User.js';
+import { addUserProfileData } from './UserProfile.js';
 
 class Request extends Entity { }
 export let requestSchema = new Schema(
@@ -31,25 +32,31 @@ export async function fetchRequestById(requestId) {
     return await fetchEntityById(requestSchema, requestId);
 }
 
+// Get requesets that userId sent
 export async function fetchRequestsByUserFromId(userFromId) {
     try {
         const requestRepo = await getRequestRepo();
         const requests = await requestRepo.search()
             .where('userFromId').eq(userFromId)
             .return.all();
-        return requests;
+
+        const requestWithProfile = await addUserProfileData(requests, undefined, 'userToId');
+        return requestWithProfile;
     } catch (error) {
         throw error;
     }
 }
 
+// Get requests that are being sent to userId
 export async function fetchRequestsByUserToId(userToId) {
     try {
         const requestRepo = await getRequestRepo();
         const requests = await requestRepo.search()
             .where('userToId').eq(userToId)
             .return.all();
-        return requests;
+
+        const requestWithProfile = await addUserProfileData(requests, undefined, 'userFromId');
+        return requestWithProfile;
     } catch (error) {
         throw error;
     }
@@ -79,19 +86,13 @@ export async function acceptRequest(requestId, userId) {
 
     // only the user who received the requeset can accept the friend request
     if (userToId !== userId) {
-        console.log('mismatch user')
-        console.log(requestId)
-        console.log({ userFromId, userToId })
-        console.log(userId)
         throw new Error("User is not authorized to accept this request");
     }
 
     // Add to each other's friend list
     const { repo, entity: user } = await fetchUserById(userFromId);
     user.friendIds.push(userToId);
-    repo.save(user).then(() => {
-
-    });
+    await repo.save(user);
 
     const { entity: friend } = await fetchUserById(userToId);
     friend.friendIds.push(userFromId);

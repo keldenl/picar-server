@@ -1,6 +1,6 @@
 import { Entity, Schema } from 'redis-om';
 import { createEntity, fetchEntityById, getEntityRepo } from './schemaUtils.js';
-import { createUserProfile } from './UserProfile.js';
+import { addUserProfileData, createUserProfile } from './UserProfile.js';
 
 
 class User extends Entity { }
@@ -39,12 +39,27 @@ export async function fetchUserById(userId) {
     return await fetchEntityById(userSchema, userId);
 }
 
+export async function fetchUserByUsername(username) {
+    try {
+        const userRepo = await getUserRepo();
+        const user = await userRepo.search()
+            .where('username').eq(username)
+            .return.first();
+
+        const userWithProfile = await addUserProfileData([user], user.entityId);
+        return userWithProfile[0];
+    } catch (error) {
+        throw error;
+    }
+}
+
 export async function fetchUserIdByUsername(username) {
     try {
         const userRepo = await getUserRepo();
         const user = await userRepo.search()
             .where('username').eq(username)
             .return.first();
+
         return user.entityId;
     } catch (error) {
         throw error;

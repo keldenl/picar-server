@@ -13,8 +13,7 @@ export async function createEntity(schema, data) {
 
 export async function getEntityRepo(schema) {
     const client = await clientConnect();
-    const repository = new Repository(schema, client);
-    return repository;
+    return client.fetchRepository(schema);
 }
 
 export async function fetchEntityById(schema, id) {

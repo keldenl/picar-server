@@ -6,14 +6,18 @@ import passport from "passport";
 import dotenv from 'dotenv';
 import "./passport.js"
 
-import { getUserRepo, fetchUserById, fetchUserIdByUsername } from './schema/user.js';
+import { getUserRepo, fetchUserById, fetchUserIdByUsername, fetchUserByUsername } from './schema/user.js';
 import { createIndex } from './createIndex.js';
 import { createPost, fetchPostByUserId } from './schema/Post.js';
 import { acceptRequest, createRequest, fetchRequestsByUserFromId, fetchRequestsByUserToId, removeRequestById } from './schema/Request.js';
+import { updateUserProfileDisplayPicture } from './schema/UserProfile.js';
+import { clientConnect } from './redisUtil.js';
 
 if (process.env.NODE_ENV !== 'production') {
     dotenv.config();
 }
+
+await clientConnect()
 
 const PORT = process.env.PORT || 9000;
 const app = express();
@@ -67,7 +71,8 @@ app.get("/failed", (req, res) => {
     res.send("Failed")
 })
 app.get("/success", isLoggedIn, (req, res) => {
-    res.redirect(`http://localhost:3000/picar/profile/${req.user.username}`)
+    res.redirect(`http://localhost:3000/picar/`)
+    // go to home for now profile/${req.user.username}
 })
 
 app.get('/google',
@@ -115,6 +120,17 @@ app.get("/users", async (req, res) => {
 })
 
 app.get('/users/:username', async (req, res) => {
+    const { username } = req.params
+    console.log(username)
+    try {
+        const user = await fetchUserByUsername(username);
+        return res.status(200).json(user);
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
+    }
+})
+
+app.get('/users/id/:username', async (req, res) => {
     const { username } = req.params
     try {
         const userId = await fetchUserIdByUsername(username);
@@ -224,6 +240,19 @@ app.post('/requests/delete', isLoggedIn, async (req, res) => {
         return res.status(500).json({ message: error.message })
     }
 })
+
+// user profile routes
+app.post("/updateDisplayPicture", isLoggedIn, async (req, res) => {
+    const { uploadImg: displayPicture } = req.body
+    const { entityId: userId } = req.user
+    try {
+        const newUserProfile = await updateUserProfileDisplayPicture(userId, displayPicture);
+        return res.status(201).json(newUserProfile)
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
+    }
+})
+
 
 app.listen(PORT, () => {
     console.log(`App listening on Port ${PORT}`);

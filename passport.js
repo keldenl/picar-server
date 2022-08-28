@@ -4,7 +4,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from 'passport-google-oauth2';
 import { clientConnect } from './redisUtil.js';
 import { createUser, getUserRepo } from './schema/user.js';
-import { createUserProfile, updateUserProfileByUserId } from './schema/UserProfile.js';
+import { createUserProfile } from './schema/UserProfile.js';
 
 if (process.env.NODE_ENV !== 'production') {
     dotenv.config();
