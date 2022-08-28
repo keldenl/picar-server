@@ -1,5 +1,4 @@
-import { Client, Entity, Schema, Repository } from 'redis-om';
-import { clientConnect } from '../redisUtil.js';
+import { Entity, Schema } from 'redis-om';
 import { createEntity, fetchEntityById, getEntityRepo } from './schemaUtils.js';
 import { addUserProfileData } from './UserProfile.js';
 

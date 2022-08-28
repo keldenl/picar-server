@@ -23,7 +23,6 @@ export async function createUser(data) {
         friendIds: []
     }
     const newUser = await createEntity(userSchema, { ...defaultValues, ...data });
-    console.log(newUser)
     createUserProfile({
         userId: newUser.id,
         username: newUser.username
@@ -43,10 +42,10 @@ export async function fetchUserById(userId) {
 export async function fetchUserIdByUsername(username) {
     try {
         const userRepo = await getUserRepo();
-        const users = await userRepo.search()
+        const user = await userRepo.search()
             .where('username').eq(username)
-            .return.all();
-        return users[0].entityId;
+            .return.first();
+        return user.entityId;
     } catch (error) {
         throw error;
     }
