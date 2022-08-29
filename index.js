@@ -6,7 +6,7 @@ import passport from "passport";
 import dotenv from 'dotenv';
 import "./passport.js"
 
-import { getUserRepo, fetchUserById, fetchUserIdByUsername, fetchUserByUsername, fetchFriendListByUserId } from './schema/user.js';
+import { getUserRepo, fetchUserById, fetchUserIdByUsername, fetchUserByUsername, fetchFriendListByUserId } from './schema/User.js';
 import { createIndex } from './createIndex.js';
 import { createPost, fetchFriendPostsByUserId, fetchPostByUserId } from './schema/Post.js';
 import { acceptRequest, createRequest, fetchRequestsByUserFromId, fetchRequestsByUserToId, removeRequestById } from './schema/Request.js';
