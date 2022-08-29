@@ -1,0 +1,35 @@
+{
+    "app_name": "Picar",
+    "description": "Photo sharing with friends reimagined",
+    "hidden": false,
+    "rank": 21,
+    "type": "Full App",
+    "contributed_by": "Partner",
+    "repo_url": "https://github.com/keldenl/picar-server",
+    "download_url": "https://github.com/keldenl/picar-server",
+    "hosted_url": "",
+    "language": [
+        "Javascript",
+        "Node.js",
+        "Express",
+        "Redis-om"
+    ],
+    "redis_commands": [],
+    "redis_features": [
+        "stack"
+    ],
+    "redis_modules": [
+        "RediJSON",
+        "RediSeearch"
+    ],
+    "app_image_urls": [],
+    "youtube_url": "https://www.youtube.com/watch?v=NDIMNVkGzno",
+    "special_tags": [
+        "Hackathon",
+        "Redis Hackathon"
+    ],
+    "verticals": [
+        "Technology"
+    ],
+    "markdown": "https://raw.githubusercontent.com/keldenl/picar-server/main/README.MD"
+}
