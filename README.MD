@@ -46,9 +46,10 @@ There are several different schemas of entites that we store. They are all avail
 ### How the data is accessed:
 We used `redis-om` to implement the schemas, entities, and the searches. Here are 2 examples of the core data accessing we did.
 
-- Get a user's posts
+- Get a user's posts from username
     - Line 180 on `/index.js`
     - ```
+      // First, fetch the userId from the username
       const userId = await fetchUserIdByUsername(username);
 
       // Pasting fetchUserIdByUsername implementation
@@ -88,7 +89,6 @@ N/A
 
 ## How to run it locally?
 
-[Make sure you test this with a fresh clone of your repo, these instructions will be used to judge your app.]
 1. Set up all your environment variables locally (create a `.env` file with all these keys with proper values)
     - REDIS setup: These should be self explanatory, connect to the Redis Cloud Stack with these
         - REDIS_HOST
