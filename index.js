@@ -112,12 +112,12 @@ app.get("/createIndex", (req, res) => {
 })
 
 // user routes
-app.get("/users", async (req, res) => {
-    const userRepo = await getUserRepo();
-    const users = await userRepo.search()
-        .return.all();
-    return res.status(202).json({ message: error.message });
-})
+// app.get("/users", async (req, res) => {
+//     const userRepo = await getUserRepo();
+//     const users = await userRepo.search()
+//         .return.all();
+//     return res.status(202).json({ message: error.message });
+// })
 
 app.get('/users/:username', async (req, res) => {
     const { username } = req.params
