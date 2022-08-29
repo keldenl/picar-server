@@ -55,6 +55,8 @@ export async function fetchFriendPostsByUserId(userId, page = 0, offset = 10) {
         const { entity: user } = await fetchUserById(userId);
         const friendIds = user.toJSON().friendIds;
 
+        if (friendIds.length === 0) return [];
+
         const postRepo = await getPostRepo();
         var posts = await postRepo.search()
             .where('userId').eq(friendIds)
