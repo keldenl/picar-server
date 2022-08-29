@@ -10,7 +10,7 @@ import { getUserRepo, fetchUserById, fetchUserIdByUsername, fetchUserByUsername,
 import { createIndex } from './createIndex.js';
 import { createPost, fetchFriendPostsByUserId, fetchPostByUserId } from './schema/Post.js';
 import { acceptRequest, createRequest, fetchRequestsByUserFromId, fetchRequestsByUserToId, removeRequestById } from './schema/Request.js';
-import { updateUserProfileDisplayPicture } from './schema/UserProfile.js';
+import { fetchUserProfileByUserId, updateUserProfileDisplayPicture } from './schema/UserProfile.js';
 import { clientConnect } from './redisUtil.js';
 
 if (process.env.NODE_ENV !== 'production') {
@@ -99,7 +99,7 @@ app.get("/logout", (req, res, next) => {
     req.logout(function (err) {
         if (err) { return next(err); }
         // res.json({ message: 'Logged out' })
-        res.redirect(`${ALLOW_ORIGIN}/picar`)
+        res.redirect(`${process.env.ALLOW_ORIGIN}/picar`)
     });
 })
 
@@ -157,8 +157,12 @@ app.post("/updateUsername", isLoggedIn, async (req, res) => {
     user.username = newUsername;
     await repo.save(user);
 
+    const userProfile = await fetchUserProfileByUserId(userId);
+    userProfile.username = newUsername;
+    await repo.save(userProfile);
+
     req.session.passport.user.username = newUsername
-    return res.status(202).json(user);
+    return res.status(202).json({ user, userProfile });
 })
 
 // posts routes

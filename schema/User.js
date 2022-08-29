@@ -23,12 +23,11 @@ export async function createUser(data) {
         friendIds: []
     }
     const newUser = await createEntity(userSchema, { ...defaultValues, ...data });
-    createUserProfile({
+    const { entity: userProfile } = await createUserProfile({
         userId: newUser.id,
         username: newUser.username
-    }).then(() => {
-        return newUser;
-    }).catch((e) => { throw e; })
+    })
+    return { ...newUser, userProfile }
 }
 
 export async function getUserRepo() {

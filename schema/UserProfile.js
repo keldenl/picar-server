@@ -32,6 +32,7 @@ export async function fetchUserProfileByUserId(userId) {
         const userProfile = await userProfileRepo.search()
             .where('userId').eq(userId)
             .return.first();
+        console.log('fetch: ', userProfile)
         return userProfile;
     } catch (error) {
         throw error;
@@ -50,10 +51,11 @@ export async function addUserProfileData(dataList, userId, idField = 'userId') {
 }
 
 export async function updateUserProfileDisplayPicture(userId, displayPicture) {
-    const repo = await getUserProfileRepo();
-    const userProfile = await fetchUserProfileByUserId(userId);
-    userProfile.displayPicture = displayPicture;
     try {
+        const repo = await getUserProfileRepo();
+        const userProfile = await fetchUserProfileByUserId(userId);
+        console.log(userProfile);
+        userProfile.displayPicture = displayPicture;
         await repo.save(userProfile);
         return userProfile;
     } catch (e) {
