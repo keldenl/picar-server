@@ -1,5 +1,6 @@
 import { Entity, Schema } from 'redis-om';
 import { createEntity, fetchEntityById, getEntityRepo } from './schemaUtils.js';
+import { fetchUserById } from './User.js';
 import { addUserProfileData } from './UserProfile.js';
 
 class Post extends Entity { }
@@ -40,6 +41,23 @@ export async function fetchPostByUserId(userId, page = 0, offset = 10) {
         const postRepo = await getPostRepo();
         const posts = await postRepo.search()
             .where('userId').eq(userId)
+            .sortBy('datePosted', 'DESC')
+            .returnPage(page, offset);
+        const postsWithProfile = await addUserProfileData(posts)
+        return postsWithProfile;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function fetchFriendPostsByUserId(userId, page = 0, offset = 10) {
+    try {
+        const { entity: user } = await fetchUserById(userId);
+        const friendIds = user.toJSON().friendIds;
+
+        const postRepo = await getPostRepo();
+        var posts = await postRepo.search()
+            .where('userId').eq(friendIds)
             .sortBy('datePosted', 'DESC')
             .returnPage(page, offset);
         const postsWithProfile = await addUserProfileData(posts)

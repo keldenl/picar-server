@@ -79,7 +79,6 @@ export async function acceptRequest(requestId, userId) {
     const { userFromId, userToId } = requestEntity;
 
     if (userFromId == null || userToId == null) {
-        console.log('one of them is null')
         throw new Error("The friend request you're trying to accept doesn't exist or is corrupted")
     }
 

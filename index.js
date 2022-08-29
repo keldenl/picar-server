@@ -6,9 +6,9 @@ import passport from "passport";
 import dotenv from 'dotenv';
 import "./passport.js"
 
-import { getUserRepo, fetchUserById, fetchUserIdByUsername, fetchUserByUsername } from './schema/user.js';
+import { getUserRepo, fetchUserById, fetchUserIdByUsername, fetchUserByUsername, fetchFriendListByUserId } from './schema/user.js';
 import { createIndex } from './createIndex.js';
-import { createPost, fetchPostByUserId } from './schema/Post.js';
+import { createPost, fetchFriendPostsByUserId, fetchPostByUserId } from './schema/Post.js';
 import { acceptRequest, createRequest, fetchRequestsByUserFromId, fetchRequestsByUserToId, removeRequestById } from './schema/Request.js';
 import { updateUserProfileDisplayPicture } from './schema/UserProfile.js';
 import { clientConnect } from './redisUtil.js';
@@ -121,10 +121,19 @@ app.get("/users", async (req, res) => {
 
 app.get('/users/:username', async (req, res) => {
     const { username } = req.params
-    console.log(username)
     try {
         const user = await fetchUserByUsername(username);
         return res.status(200).json(user);
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
+    }
+})
+
+app.get('/users/friends/:userId', async (req, res) => {
+    const { userId } = req.params
+    try {
+        const friendList = await fetchFriendListByUserId(userId);
+        return res.status(200).json(friendList);
     } catch (error) {
         return res.status(500).json({ message: error.message })
     }
@@ -169,6 +178,17 @@ app.get('/posts/:username', async (req, res) => {
     try {
         const userId = await fetchUserIdByUsername(username);
         const posts = await fetchPostByUserId(userId);
+        return res.status(200).json(posts);
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
+    }
+})
+
+app.get('/feed', isLoggedIn, async (req, res) => {
+    const { entityId: userId } = req.user
+
+    try {
+        const posts = await fetchFriendPostsByUserId(userId);
         return res.status(200).json(posts);
     } catch (error) {
         return res.status(500).json({ message: error.message })

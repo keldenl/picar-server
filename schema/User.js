@@ -65,3 +65,16 @@ export async function fetchUserIdByUsername(username) {
         throw error;
     }
 }
+
+export async function fetchFriendListByUserId(userId) {
+    try {
+        const { entity: user } = await fetchUserById(userId);
+        const friendIds = user.toJSON().friendIds.map(id => {
+            return { userId: id }
+        })
+        const friendIdsWithProfile = await addUserProfileData(friendIds);
+        return friendIdsWithProfile;
+    } catch (error) {
+        throw error;
+    }
+}

@@ -40,8 +40,9 @@ export async function fetchUserProfileByUserId(userId) {
 
 export async function addUserProfileData(dataList, userId, idField = 'userId') {
     const newDataList = await Promise.all(dataList.map(async (data) => {
-        const dataObj = data.toJSON();
-        const userProfile = await fetchUserProfileByUserId(userId != null ? userId : dataObj[idField])
+        // Convert to object if it's an entity
+        const dataObj = data.schemaDef != null ? data.toJSON() : data;
+        const userProfile = await fetchUserProfileByUserId(userId != null ? userId : dataObj[idField]);
         return { ...dataObj, userProfile: userProfile.toJSON() }
     }))
 
