@@ -44,24 +44,74 @@ There are several different schemas of entites that we store. They are all avail
         - `userToId (string)`: The id of the user who received the friend request.
         - `dateRequested (date)`: The date the friend request was sent.
 ### How the data is accessed:
+We used `redis-om` to implement the schemas, entities, and the searches. Here are 2 examples of the core data accessing we did.
 
-Refer to [this example](https://github.com/redis-developer/basic-analytics-dashboard-redis-bitmaps-nodejs#how-the-data-is-accessed) for a more detailed example of what you need for this section.
+- Get a user's posts
+    - Line 180 on `/index.js`
+    - ```
+      const userId = await fetchUserIdByUsername(username);
 
+      // Pasting fetchUserIdByUsername implementation
+      // userRepo.search()
+      //      .where('username').eq(username)
+      //      .return.first();
+
+
+      const posts = await fetchPostByUserId(userId);
+
+      // Pasting fetchPostByUserId implementation
+      // const posts = await postRepo.search()
+      //     .where('userId').eq(userId)
+      //     .sortBy('datePosted', 'DESC')
+      //     .returnPage(page, offset);
+      // const postsWithProfile = await addUserProfileData(posts)
+      // return postsWithProfile;
+
+      return posts; // all the user's posts
+
+- Adding user profile data to any object
+    -  One tricky thing that we had to do is to get user profile data (username, display picture) whenever we retrieved other entites, like posts or friend requests (which only have userId)
+    - **Solution:** Append the `UserProfile` entity to each entity that requires it by querying for the userId in the `UserProfile` schema
+        - ```
+          // First, fetch the UserProfile from userId
+          const userProfile = await userProfileRepo.search()
+            .where('userId').eq(userId)
+            .return.first();
+
+          // (Simplified)
+          // Fetch userProfile and return the original data appended with the UserProfile
+          const userProfile = await fetchUserProfileByUserId(data.userId);
+          return { ...data, userProfile }
+        
 ### Performance Benchmarks
-
-[If you migrated an existing app to use Redis, please put performance benchmarks here to show the performance improvements.]
+N/A
 
 ## How to run it locally?
 
 [Make sure you test this with a fresh clone of your repo, these instructions will be used to judge your app.]
+1. Set up all your environment variables locally (create a `.env` file with all these keys with proper values)
+    - REDIS setup: These should be self explanatory, connect to the Redis Cloud Stack with these
+        - REDIS_HOST
+        - REDIS_PORT
+        - REDIS_PASSWORD
+    - Google OAuth Setup: You'll need to set up a new Google App project and get the OAuth credentials
+        - GOOGLE_CLIENT_ID
+        - GOOGLE_SECRET
+    - Since the FRONT END ([git repo here](https://github.com/keldenl/picar)) is hosted separately from the server (this repo), we must allow CORS for specifically the FE domain. Do so with the following env variable.
+        - ALLOW_ORIGIN
+2. Install all your dependencies with `yarn`
+3. `git clone` [the frontend as well](https://github.com/keldenl/picar)
+4. Run `yarn start` for `picar-server`
+5. Run `yarn start` for `picar`
+6. Go to `localhost` to test it out!
 
 ### Prerequisites
 
-[Fill out with any prerequisites (e.g. Node, Docker, etc.). Specify minimum versions]
+N/A
 
 ### Local installation
 
-[Insert instructions for local installation]
+Similar steps to above's `How to run it locally?`, but run `yarn deploy` for the [front end](https://github.com/keldenl/picar).
 
 ## Deployment
 
