@@ -1,23 +1,48 @@
-# [Insert your hackathon title or the app's title (keep it short)]
+# Picar
 
-[Insert description of app]
+Photo sharing social media with friends reimagined, combining privacy and flexibility. See photos from friends, not from advertisers or influencers.
 
-[Insert app screenshots](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#uploading-assets)
+![ariana profile page example](./docs/ariana-profile.png)
+*Example Ariana Grande profile page*
+
+**NOTE: FRONT END CODE LIVES [HERE](https://github.com/keldenl/picar)**
 
 # Overview video (Optional)
 
 Here's a short video that explains the project and how it uses Redis:
-
-[Insert your own video here, and remove the one below]
 
 [![Embed your YouTube video](https://i.ytimg.com/vi/vyxdC1qK4NE/maxresdefault.jpg)](https://www.youtube.com/watch?v=vyxdC1qK4NE)
 
 ## How it works
 
 ### How the data is stored:
+There are several different schemas of entites that we store. They are all available in more detail at `/schema/<ENTITY_HERE>`. 
 
-Refer to [this example](https://github.com/redis-developer/basic-analytics-dashboard-redis-bitmaps-nodejs#how-the-data-is-stored) for a more detailed example of what you need for this section.
+*Note: The app only supports logging in with Google.*
 
+1. `User`: Main user entity
+    - Fields
+        - `sub (string)`: The unique idenfier for each user Google gives
+        - `email (string)`: Email of the user. Also provided by Google.
+        - `username (string)`: Username that represents the user. This is by default first name + last name's initial (provided by Google). This can be changed afterwards.
+        - `friendIds (string[])`: String array of friends (by userId) that this user has.
+2. `UserProfile`: Additional user information quickly accessed to display profile information by userId (such as username, display picture)
+    - Fields
+        - `userId (string)`: The id of the user associated
+        - `username (string)`: Username that represents the user. This is by default first name + last name's initial (provided by Google). This can be changed afterwards.
+        - `displayPicture (string)`: Display picture shown next to the user's username. Stored in base64.
+3. `Post`: Represents a picture post by a user
+    - Fields
+        - `userId (string)`: The id of the user associated
+        - `data (string)`: Picture data for the post. Stored in base64.
+        - `datePosted (date)`: The date the picture was posted.
+        - `description (string, optional)`: A string description of the post.
+        - `likers (string[])`:  String array of users (by userId) who have liked this post.
+4. `Request`: Represents a friend request made by one user to another
+    - Fields
+        - `userFromId (string)`: The id of the user who sent the friend request.
+        - `userToId (string)`: The id of the user who received the friend request.
+        - `dateRequested (date)`: The date the friend request was sent.
 ### How the data is accessed:
 
 Refer to [this example](https://github.com/redis-developer/basic-analytics-dashboard-redis-bitmaps-nodejs#how-the-data-is-accessed) for a more detailed example of what you need for this section.
