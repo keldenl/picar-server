@@ -1,10 +1,7 @@
 import dotenv from 'dotenv';
-import { Client, Entity, Schema, Repository } from 'redis-om';
 import passport from "passport";
 import { Strategy as GoogleStrategy } from 'passport-google-oauth2';
-import { clientConnect } from './redisUtil.js';
-import { createUser, getUserRepo } from './schema/user.js';
-import { createUserProfile } from './schema/UserProfile.js';
+import { createUser, getUserRepo } from './schema/User.js';
 
 if (process.env.NODE_ENV !== 'production') {
     dotenv.config();
