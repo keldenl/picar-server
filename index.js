@@ -71,7 +71,7 @@ app.get("/failed", (req, res) => {
     res.send("Failed")
 })
 app.get("/success", isLoggedIn, (req, res) => {
-    res.redirect(`http://localhost:3000/picar/`)
+    res.redirect(`${process.env.ALLOW_ORIGIN}/picar/`)
     // go to home for now profile/${req.user.username}
 })
 
@@ -99,7 +99,7 @@ app.get("/logout", (req, res, next) => {
     req.logout(function (err) {
         if (err) { return next(err); }
         // res.json({ message: 'Logged out' })
-        res.redirect('http://localhost:3000/picar')
+        res.redirect(`${ALLOW_ORIGIN}/picar`)
     });
 })
 
