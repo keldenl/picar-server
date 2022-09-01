@@ -29,14 +29,17 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 5
 app.use(cookieSession({
     name: 'picar-auth-session',
     keys: process.env.COOKIE_KEYS.split(','),
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: process.env.NODE_ENV !== 'production' ? false : 'none',
+    httpOnly: process.env.NODE_ENV !== 'production' ? false : true,
+    secure: process.env.NODE_ENV !== 'production' ? false : true,
 }));
 
 // allow cross origin cookies
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Credentials', true);
     res.header('Access-Control-Allow-Origin', process.env.ALLOW_ORIGIN);
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Methods', "GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH");
     res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
     if ('OPTIONS' == req.method) {
         res.sendStatus(200);
