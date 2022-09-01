@@ -3,8 +3,10 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from 'passport-google-oauth2';
 import { createUser, getUserRepo } from './schema/User.js';
 
+let callbackURL = 'https://picar.onrender.com/google/callback/';
 if (process.env.NODE_ENV !== 'production') {
     dotenv.config();
+    callbackURL = "http://localhost:9000/google/callback";
 }
 
 // Passport setup
@@ -19,7 +21,7 @@ passport.deserializeUser(function (user, done) {
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_SECRET,
-    callbackURL: "https://picar.onrender.com/google/callback/",
+    callbackURL,
     passReqToCallback: true
 },
     async function (request, accessToken, refreshToken, profile, done) {
@@ -63,7 +65,8 @@ passport.use(new GoogleStrategy({
                 console.log('created new user: ' + newUser);
                 return done(null, newUser)
             } catch (e) {
-                return done(e, ...newUserData);
+                console.log(e);
+                throw done(e, ...newUserData);
             }
         }
 

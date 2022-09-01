@@ -58,7 +58,6 @@ export async function fetchUserIdByUsername(username) {
         const user = await userRepo.search()
             .where('username').eq(username)
             .return.first();
-
         return user.entityId;
     } catch (error) {
         throw error;

@@ -1,5 +1,5 @@
 import express from 'express';
-import session from 'express-session';
+import cookieSession from 'cookie-session';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import passport from "passport";
@@ -26,6 +26,12 @@ app.use(cookieParser());
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
 
+app.use(cookieSession({
+    name: 'picar-auth-session',
+    keys: process.env.COOKIE_KEYS.split(','),
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
+
 // allow cross origin cookies
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Credentials', true);
@@ -38,14 +44,6 @@ app.use(function (req, res, next) {
         next();
     }
 });
-
-app.use(session({
-    name: 'picar-auth-session',
-    secret: 'sajfkaj23jikl',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
-}));
 
 const isLoggedIn = (req, res, next) => {
     if (req.user) {
@@ -86,7 +84,8 @@ app.get('/google/callback',
     passport.authenticate('google', {
         failureRedirect: '/failed',
         successRedirect: '/success',
-        session: true
+        failureMessage: true,
+        keepSessionInfo: true
     }),
     function (req, res) {
         user = req.user;
@@ -94,13 +93,15 @@ app.get('/google/callback',
     }
 );
 
-app.get("/logout", (req, res, next) => {
+app.get("/logout", async (req, res, next) => {
     // req.session = null;
-    req.logout(function (err) {
-        if (err) { return next(err); }
-        // res.json({ message: 'Logged out' })
-        res.redirect(`${process.env.ALLOW_ORIGIN}/picar`)
-    });
+    req.logout();
+    res.redirect(`${process.env.ALLOW_ORIGIN}/picar`);
+    // for 0.6.0
+    // req.logout(function (err) {
+    //     if (err) { return next(err); }
+    //     res.redirect(`${process.env.ALLOW_ORIGIN}/picar`)
+    // });
 })
 
 
